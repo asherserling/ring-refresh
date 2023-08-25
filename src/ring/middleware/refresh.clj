@@ -5,7 +5,7 @@
         ring.middleware.params)
   (:require [clojure.string :as str]
             [clojure.java.io :as io])
-  (:import [java.util Date UUID]))
+  (:import [java.util Date UUID Calendar]))
 
 (defn- get-request? [request]
   (= (:request-method request) :get))
@@ -43,13 +43,15 @@
      #(str % "<script type=\"text/javascript\">" script "</script>"))))
 
 (def ^:private last-modified
-  (atom (Date.)))
+  (atom (doto (Calendar/getInstance)
+      (.setTime (Date.)))))
 
 (defn- watch-dirs! [dirs]
   (watcher dirs
    (rate 100)
    (on-change
-    (fn [_] (reset! last-modified (Date.))))))
+    (fn [_] (reset! last-modified (doto (Calendar/getInstance)
+                                     (.setTime (Date.))))))))
 
 (defn- random-uuid []
   (str (UUID/randomUUID)))
